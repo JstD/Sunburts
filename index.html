@@ -1,0 +1,155 @@
+<!DOCTYPE html>  
+<html lang="en">  
+  
+<head>  
+    <meta charset="UTF-8" />  
+    <meta name="viewport"
+          content="width=device-width,  
+                  initial-scale=1.0"/>  
+   
+    <!--Fetching from CDN of D3.js -->
+    <script src= "https://d3js.org/d3.v4.min.js"> </script> 
+        <script src= "https://d3js.org/d3-selection.v1.min.js"> </script> 
+	<script src= "sbchart.js"> </script> 
+  
+</head> 
+  
+<body>  
+    <svg width="500" height="500"> </svg> 
+  
+    <script>  
+	
+	// data to bind into the sunburstchart
+		let model = {
+			"children" : [
+				{
+					"name" : "food",
+					"value" : "300",
+					"children" : 
+					[
+						{
+							"name" : "Seafood",
+							"value" : "1300"
+						},
+						{
+							"name" : "Meat",
+							"value" : "2700"
+						}
+					]
+				},
+				{
+					"name" : "drink",
+					"value" : "800",
+					"children" : [
+						{
+							"name" : "COCACOLA",
+							"value" : "700"
+						},
+						{
+							"name" : "PEPSI",
+							"value" : "850"
+						},
+						{
+							"name" : "BEERS",
+							"value" : "5700",
+							"children" : [
+								{
+									"name" : "HENEIKEN",
+									"value" : "5700"
+								},
+								{
+									"name" : "TIGER",
+									"value" : "5700"
+								},
+								{
+									"name" : "BUDWWEISER",
+									"value" : "25700"
+								}
+							]
+						}
+					]
+				}
+			]
+		};
+		
+		// center coords
+		var cx = 220;
+		var cy = 250;
+		var chosenSector = ''
+		var isDown = false;
+		var x0=0;
+		var y0=0;
+		// create svg graphic object to draw
+        var svg = d3.select("svg") 
+			.on("mousedown", function(){
+				let mouse = d3.mouse(this);
+				isDown = true; 
+				console.log(mouse[0] + " " + mouse[1]);
+				if(y0==0 && x0==0){
+					x0= mouse[0];
+					y0= mouse[1]
+				}
+				if (chosenSector != ''){
+					let p = d3.select('#'+chosenSector);
+					let tx = mouse[0] - x0;
+					let ty = mouse[1] - y0;
+					p.attr("transform", "translate(" + tx + "," + ty + ")");
+					
+					console.log(tx + " " + ty);
+				}
+			})
+			.on("mousemove", function(){
+				if (isDown){
+					let mouse = d3.mouse(this);
+					if (chosenSector != ''){
+						let p = d3.select('#'+chosenSector);
+						let tx = mouse[0] - x0;
+						let ty = mouse[1] - y0;
+						p.attr("transform", "translate(" + tx + "," + ty + ")");
+						
+						console.log(tx + " " + ty);
+					}
+				}
+				
+			})
+			.on("mouseup", function(){
+				isDown = false;
+				chosenSector = ''
+				x0=0;
+				y0=0;
+				let mouse = d3.mouse(this);
+
+			})
+            .append("g") 
+            .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
+		
+		// create new chart		
+		var chart = new SBChart(cx,cy,70); // center coords and radius of each level
+		// bind data into the chart
+		chart.bind(model);
+		
+		// after binding, the chart will generate arc objects in its arcs property
+		// then we pick each of them to draw on to the screen
+		for	(let i =0; i < chart.arcs.length; i++){
+			let arc = chart.arcs[i];
+			svg.append("path") 
+			.attr("id", arc.name)
+            .attr("class", "arc") // set style name as "arc"
+			.attr("d", arc.item)
+			.on('mousedown',function(){
+				chosenSector = arc.name
+			})
+		}
+		// after all, we fill color for arcs
+        let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
+		// apply the style onto each element
+        for	(var i = 0; i < ps.length; i++){
+			ps[i].style.fill = "#0f0";
+			ps[i].style.stroke ="#000";
+		} 
+		
+		
+    </script>  
+</body>  
+  
+</html>
