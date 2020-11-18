@@ -107,7 +107,7 @@
 						let ty = mouse[1] - y0;
 						p.attr("transform", "translate(" + tx + "," + ty + ")");
 						
-						console.log(tx + " " + ty);
+						// console.log(mouse[0] + " " + mouse[1]);
 					}
 				}
 				
@@ -118,7 +118,10 @@
 				x0=0;
 				y0=0;
 				let mouse = d3.mouse(this);
-
+				x = mouse[0]
+				y = mouse[1]
+				sector = findSector(x,y)
+				console.log(sector)
 			})
             .append("g") 
             .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
@@ -139,13 +142,38 @@
 			.on('mousedown',function(){
 				chosenSector = arc.name
 			})
+			.attr("startAngle",arc.startAngle)
+			.attr("endAngle",arc.endAngle)
 		}
 		// after all, we fill color for arcs
+		this.findSector = function(x,y){
+			deltax = x - cx;
+			deltay = y - cy;
+			distance = Math.sqrt(deltax*deltax + deltay*deltay)
+			level = Math.floor(distance/70)
+			// vectorj = (0,1)
+			// vectorSector = (deltax,deltay)
+			deltaAngle = Math.atan2(deltax,1-deltay)
+			if (deltaAngle<0){
+				deltaAngle = deltaAngle +2*Math.PI
+			}
+			// console.log(deltaAngle)
+			gapSize = 0.05*2*Math.PI
+			for	(let i =0; i < chart.arcs.length; i++){
+				let arc = chart.arcs[i];
+				if(arc.endAngle>deltaAngle && arc.endAngle-gapSize<deltaAngle && level==arc.level){
+					result = arc.name
+					return result
+				}
+				
+			}
+		}
         let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
 		// apply the style onto each element
         for	(var i = 0; i < ps.length; i++){
 			ps[i].style.fill = "#0f0";
 			ps[i].style.stroke ="#000";
+			
 		} 
 		
 		
