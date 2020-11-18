@@ -158,10 +158,10 @@
 				deltaAngle = deltaAngle +2*Math.PI
 			}
 			// console.log(deltaAngle)
-			gapSize = 0.05*2*Math.PI
+			gapSize = 0.05
 			for	(let i =0; i < chart.arcs.length; i++){
 				let arc = chart.arcs[i];
-				if(arc.endAngle>deltaAngle && arc.endAngle-gapSize<deltaAngle && level==arc.level){
+				if(arc.endAngle+gapSize>deltaAngle && arc.endAngle-gapSize<deltaAngle && level==arc.level){
 					result = arc.name
 					return result
 				}
