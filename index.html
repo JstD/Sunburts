@@ -71,7 +71,27 @@
 				}
 			]
 		};
-		
+		const traverse = function(children, name, action, arc){
+			if (children == null) {
+				return false
+			}
+			let keyExist = children.some(function(child, index) {
+				if (child.name == name) {
+					let t
+					if (action == "delete") {
+						t = children.splice(index,1)
+					} if (action == "add") {
+						console.log("arc:", arc, index)
+						t = children.splice(index,0,arc)
+					}
+					console.log("model:", children)
+					console.log(t)
+					return true
+				}
+				return traverse(child.children, name, action, arc)
+			})
+			return keyExist
+		}
 		// center coords
 		var cx = 220;
 		var cy = 250;
@@ -80,72 +100,10 @@
 		var x0=0;
 		var y0=0;
 		// create svg graphic object to draw
-        var svg = d3.select("svg") 
-			.on("mousedown", function(){
-				let mouse = d3.mouse(this);
-				isDown = true; 
-				console.log(mouse[0] + " " + mouse[1]);
-				if(y0==0 && x0==0){
-					x0= mouse[0];
-					y0= mouse[1]
-				}
-				if (chosenSector != ''){
-					let p = d3.select('#'+chosenSector);
-					let tx = mouse[0] - x0;
-					let ty = mouse[1] - y0;
-					p.attr("transform", "translate(" + tx + "," + ty + ")");
-					
-					console.log(tx + " " + ty);
-				}
-			})
-			.on("mousemove", function(){
-				if (isDown){
-					let mouse = d3.mouse(this);
-					if (chosenSector != ''){
-						let p = d3.select('#'+chosenSector);
-						let tx = mouse[0] - x0;
-						let ty = mouse[1] - y0;
-						p.attr("transform", "translate(" + tx + "," + ty + ")");
-						
-						// console.log(mouse[0] + " " + mouse[1]);
-					}
-				}
-				
-			})
-			.on("mouseup", function(){
-				isDown = false;
-				chosenSector = ''
-				x0=0;
-				y0=0;
-				let mouse = d3.mouse(this);
-				x = mouse[0]
-				y = mouse[1]
-				sector = findSector(x,y)
-				console.log(sector)
-			})
-            .append("g") 
-            .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
-		
-		// create new chart		
+        
 		var chart = new SBChart(cx,cy,70); // center coords and radius of each level
-		// bind data into the chart
-		chart.bind(model);
-		
-		// after binding, the chart will generate arc objects in its arcs property
-		// then we pick each of them to draw on to the screen
-		for	(let i =0; i < chart.arcs.length; i++){
-			let arc = chart.arcs[i];
-			svg.append("path") 
-			.attr("id", arc.name)
-            .attr("class", "arc") // set style name as "arc"
-			.attr("d", arc.item)
-			.on('mousedown',function(){
-				chosenSector = arc.name
-			})
-			.attr("startAngle",arc.startAngle)
-			.attr("endAngle",arc.endAngle)
-		}
-		// after all, we fill color for arcs
+
+		// create new chart	
 		this.findSector = function(x,y){
 			deltax = x - cx;
 			deltay = y - cy;
@@ -162,21 +120,100 @@
 			for	(let i =0; i < chart.arcs.length; i++){
 				let arc = chart.arcs[i];
 				if(arc.endAngle+gapSize>deltaAngle && arc.endAngle-gapSize<deltaAngle && level==arc.level){
-					result = arc.name
+					result = arc
 					return result
 				}
+				// console.log(arc.name)
 				
 			}
 		}
-        let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
-		// apply the style onto each element
-        for	(var i = 0; i < ps.length; i++){
-			ps[i].style.fill = "#0f0";
-			ps[i].style.stroke ="#000";
+		let removeSVG = function(){
+			d3.select("svg").selectAll("*").remove()
+		}
+		let draw = function(model){
+			removeSVG()
 			
-		} 
+			// bind data into the chart
+			var svg = d3.select("svg") 
+			.on("mousedown", function(){
+				let mouse = d3.mouse(this);
+				isDown = true; 
+				console.log(mouse[0] + " " + mouse[1]);
+				if(y0==0 && x0==0){
+					x0= mouse[0];
+					y0= mouse[1]
+				}
+				if (chosenSector != ''){
+					let p = d3.select('#'+chosenSector.name);
+					let tx = mouse[0] - x0;
+					let ty = mouse[1] - y0;
+					p.attr("transform", "translate(" + tx + "," + ty + ")");
+					
+					console.log(tx + " " + ty);
+				}
+			})
+			.on("mousemove", function(){
+				if (isDown){
+					let mouse = d3.mouse(this);
+					if (chosenSector != ''){
+						let p = d3.select('#'+chosenSector.name);
+						let tx = mouse[0] - x0;
+						let ty = mouse[1] - y0;
+						p.attr("transform", "translate(" + tx + "," + ty + ")");
+						
+						// console.log(mouse[0] + " " + mouse[1]);
+					}
+				}
+				
+			})
+			.on("mouseup", function(){
+				let mouse = d3.mouse(this);
+				x = mouse[0]
+				y = mouse[1]
+				sector = findSector(x,y)
+				isDown = false;
+				if (sector){ 
+					// d3.select('#'+chosenSector).remove()
+					console.log(sector.name, chosenSector.name)
+					traverse(model.children, sector.name, "add", chosenSector)
+					traverse(model.children, chosenSector.name, "delete")
+					draw(model)
+					console.log(sector)
+				}
+				chosenSector = ''
+				x0=0;
+				y0=0;
+			})
+            .append("g") 
+            .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
+			
+			chart.bind(model);
+			for	(let i =0; i < chart.arcs.length; i++){
+			let arc = chart.arcs[i];
+			svg.append("path") 
+			.attr("id", arc.name)
+            .attr("class", "arc") // set style name as "arc"
+			.attr("d", arc.item)
+			.on('mousedown',function(){
+				chosenSector = arc
+			})
+			.attr("startAngle",arc.startAngle)
+			.attr("endAngle",arc.endAngle)
+		}
+		// after all, we fill color for arcs
 		
-		
+			let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
+			// apply the style onto each element
+			for	(var i = 0; i < ps.length; i++){
+				ps[i].style.fill = "#0f0";
+				ps[i].style.stroke ="#000";
+				
+			} 
+
+		}
+		// after binding, the chart will generate arc objects in its arcs property
+		// then we pick each of them to draw on to the screen
+		draw(model)
     </script>  
 </body>  
   
