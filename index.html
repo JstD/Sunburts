@@ -114,14 +114,21 @@
 			})
 			.on("mouseup", function(){
 				isDown = false;
-				chosenSector = ''
-				x0=0;
-				y0=0;
 				let mouse = d3.mouse(this);
 				x = mouse[0]
 				y = mouse[1]
 				sector = findSector(x,y)
-				console.log(sector)
+				if (sector){
+					console.log(sector)
+				}
+				else{
+					let p = d3.select('#'+chosenSector);
+					p.attr("transform", "translate(" + 0 + "," + 0 + ")");
+				}
+				x0=0;
+				y0=0;
+				chosenSector = ''
+
 			})
             .append("g") 
             .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
@@ -136,16 +143,31 @@
 		for	(let i =0; i < chart.arcs.length; i++){
 			let arc = chart.arcs[i];
 			svg.append("path") 
-			.attr("id", arc.name)
-            .attr("class", "arc") // set style name as "arc"
-			.attr("d", arc.item)
-			.on('mousedown',function(){
-				chosenSector = arc.name
-			})
-			.attr("startAngle",arc.startAngle)
-			.attr("endAngle",arc.endAngle)
-		}
-		// after all, we fill color for arcs
+				.attr("id", arc.name)
+				.attr("class", "arc") // set style name as "arc"
+				.attr("d", arc.item)
+				.on('mousedown',function(){
+					chosenSector = arc.name
+				})
+				.attr("startAngle",arc.startAngle)
+				.attr("endAngle",arc.endAngle);
+			var label = d3.arc()
+					.outerRadius(arc.outerRadius)
+					.innerRadius(arc.innerRadius);
+			var rot = function(){
+				a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+				if(a>90) return a+180;
+				else return a;
+			}
+			svg.append("text")
+				.attr("id", arc.name)
+				// .attr("class", "arc")
+				.text(function() { return arc.name +": "+ arc.value})
+				.attr("text-anchor", "middle")
+				.attr("transform", "translate(" + label.centroid(arc) + ")" +"rotate(" + rot() + ")")
+				.style("font-size", "10px")
+
+			}	
 		this.findSector = function(x,y){
 			deltax = x - cx;
 			deltay = y - cy;
@@ -173,9 +195,7 @@
         for	(var i = 0; i < ps.length; i++){
 			ps[i].style.fill = "#0f0";
 			ps[i].style.stroke ="#000";
-			
 		} 
-		
 		
     </script>  
 </body>  
