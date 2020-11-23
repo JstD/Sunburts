@@ -39,7 +39,7 @@ var SBChart = function(cx, cy, lvlRadius){
 				this.arcs.push({"parent":parentName, 
 								"name":children[i].name, 
 								"item":arc,
-								"startAngle":curAngle,
+								"startAngle":curAngle+0.05,
 								"endAngle":endAngle,
 								"level": Math.floor((r+ this.lvlRadius)/(this.lvlRadius))-1,
 								"innerRadius": r + r0,

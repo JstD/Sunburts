@@ -15,7 +15,7 @@
 </head> 
   
 <body>  
-    <svg width="500" height="500"> </svg> 
+    <svg width="1000" height="1000"> </svg> 
   
     <script>  
 	
@@ -71,14 +71,16 @@
 				}
 			]
 		};
-		
 		// center coords
-		var cx = 220;
-		var cy = 250;
+		var cx = 300;
+		var cy = 300;
 		var chosenSector = ''
 		var isDown = false;
 		var x0=0;
 		var y0=0;
+		var chart = new SBChart(cx,cy,100); // center coords and radius of each level
+		// bind data into the chart
+		chart.bind(model);
 		// create svg graphic object to draw
         var svg = d3.select("svg") 
 			.on("mousedown", function(){
@@ -94,8 +96,24 @@
 					let tx = mouse[0] - x0;
 					let ty = mouse[1] - y0;
 					p.attr("transform", "translate(" + tx + "," + ty + ")");
-					
-					console.log(tx + " " + ty);
+					for	(let i =0; i < chart.arcs.length; i++){
+						arc = chart.arcs[i];
+						if(arc.name == chosenSector){
+							var label = d3.arc()
+										.outerRadius(arc.outerRadius)
+										.innerRadius(arc.innerRadius);
+							a = label.centroid(arc);
+							a[0] += tx
+							a[1] += ty
+							// var rot = function(){
+							// 	a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+							// 	if(a>90) return a+180;
+							// 	else return a;
+							// }
+							d3.select('#text'+chosenSector)
+							.attr("transform", "translate(" + tx +","+ty + ")" +"rotate(" + rot() + ")");							break;
+						}
+					}
 				}
 			})
 			.on("mousemove", function(){
@@ -106,12 +124,30 @@
 						let tx = mouse[0] - x0;
 						let ty = mouse[1] - y0;
 						p.attr("transform", "translate(" + tx + "," + ty + ")");
-						
-						// console.log(mouse[0] + " " + mouse[1]);
+					for	(let i =0; i < chart.arcs.length; i++){
+						arc = chart.arcs[i];
+						if(arc.name == chosenSector){
+							var label = d3.arc()
+										.outerRadius(arc.outerRadius)
+										.innerRadius(arc.innerRadius);
+							a = label.centroid(arc);
+							a[0] += tx
+							a[1] += ty
+							// var rot = function(){
+							// 	a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+							// 	if(a>90) return a+180;
+							// 	else return a;
+							// }
+							d3.select('#text'+chosenSector)
+							.attr("transform", "translate(" + a + ")");
+							break;
+						}
 					}
+					console.log(tx + " " + ty);
 				}
-				
-			})
+			}
+						// console.log(mouse[0] + " " + mouse[1]);				
+		})
 			.on("mouseup", function(){
 				isDown = false;
 				let mouse = d3.mouse(this);
@@ -124,6 +160,28 @@
 				else{
 					let p = d3.select('#'+chosenSector);
 					p.attr("transform", "translate(" + 0 + "," + 0 + ")");
+					for	(let i =0; i < chart.arcs.length; i++){
+						arc = chart.arcs[i];
+						if(arc.name == chosenSector){
+							var label = d3.arc()
+										.outerRadius(arc.outerRadius)
+										.innerRadius(arc.innerRadius);
+							var rot = function(){
+							a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+							if(a>90) return a+180;
+							else return a;
+							}
+							a = label.centroid(arc);
+							// var rot = function(){
+							// 	a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+							// 	if(a>90) return a+180;
+							// 	else return a;
+							// }
+							d3.select('#text'+chosenSector)
+							.attr("transform", "translate(" + a + ")" +"rotate(" + rot() + ")")
+							break;
+						}
+					}
 				}
 				x0=0;
 				y0=0;
@@ -134,9 +192,7 @@
             .attr("transform", "translate(" +cx+ ","+cy+")");; // transition to cx, cy 
 		
 		// create new chart		
-		var chart = new SBChart(cx,cy,70); // center coords and radius of each level
-		// bind data into the chart
-		chart.bind(model);
+	
 		
 		// after binding, the chart will generate arc objects in its arcs property
 		// then we pick each of them to draw on to the screen
@@ -159,20 +215,22 @@
 				if(a>90) return a+180;
 				else return a;
 			}
+			a = label.centroid(arc)
 			svg.append("text")
-				.attr("id", arc.name)
-				// .attr("class", "arc")
+				.attr("id", "text"+arc.name)
+				.attr("class", "text")
 				.text(function() { return arc.name +": "+ arc.value})
 				.attr("text-anchor", "middle")
-				.attr("transform", "translate(" + label.centroid(arc) + ")" +"rotate(" + rot() + ")")
-				.style("font-size", "10px")
-
-			}	
+				.attr("transform", "translate(" + a + ")" +"rotate(" + rot() + ")")
+				.style("font-size", "10px")	
+		}
+		
+				
 		this.findSector = function(x,y){
 			deltax = x - cx;
 			deltay = y - cy;
 			distance = Math.sqrt(deltax*deltax + deltay*deltay)
-			level = Math.floor(distance/70)
+			level = Math.floor(distance/100)
 			// vectorj = (0,1)
 			// vectorSector = (deltax,deltay)
 			deltaAngle = Math.atan2(deltax,1-deltay)
