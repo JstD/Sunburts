@@ -31,21 +31,39 @@ var SBChart = function(cx, cy, lvlRadius){
 					.innerRadius(r + r0) 
 					.startAngle(curAngle) 
 					.endAngle(endAngle)
-					.padAngle(0.05)
+					// .padAngle(0.05)
 					// Use of cornerRadius Function 
 					.cornerRadius(0); 
 				// console.log(curAngle, endAngle,children[i].name)
-
+				let gap = d3.arc() 
+					.outerRadius(r + this.lvlRadius - r0) 
+					.innerRadius(r + r0) 
+					.startAngle(endAngle) 
+					.endAngle(endAngle+0.1)
+					// Use of cornerRadius Function
+					// .padAngle(0.05) 
+					.cornerRadius(0);
 				this.arcs.push({"parent":parentName, 
 								"name":children[i].name, 
 								"item":arc,
-								"startAngle":curAngle+0.05,
+								"startAngle":curAngle,
 								"endAngle":endAngle,
 								"level": Math.floor((r+ this.lvlRadius)/(this.lvlRadius))-1,
 								"innerRadius": r + r0,
 								"outerRadius":r + this.lvlRadius - r0,
 								"value": children[i].value
 							});
+				this.arcs.push({
+								"parent":parentName, 
+								"name":"blank"+parentName+i, 
+								"item":gap,
+								"startAngle":endAngle,
+								"endAngle":endAngle+0.05,
+								"level": Math.floor((r+ this.lvlRadius)/(this.lvlRadius))-1,
+								"innerRadius": r + r0,
+								"outerRadius":r + this.lvlRadius - r0,
+								// "value": children[i].value
+				})
 				this.generateArcs(curAngle, children[i].span, r + this.lvlRadius, children[i].children, children[i].name);
 				curAngle += children[i].span;
 			}

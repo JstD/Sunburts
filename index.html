@@ -82,7 +82,7 @@
 		// bind data into the chart
 		chart.bind(model);
 		// create svg graphic object to draw
-        var svg = d3.select("svg") 
+        var svg = d3.select("svg")
 			.on("mousedown", function(){
 				let mouse = d3.mouse(this);
 				isDown = true; 
@@ -105,13 +105,8 @@
 							a = label.centroid(arc);
 							a[0] += tx
 							a[1] += ty
-							// var rot = function(){
-							// 	a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
-							// 	if(a>90) return a+180;
-							// 	else return a;
-							// }
 							d3.select('#text'+chosenSector)
-							.attr("transform", "translate(" + tx +","+ty + ")" +"rotate(" + rot() + ")");							break;
+							.attr("transform", "translate(" + a+ ")");							break;
 						}
 					}
 				}
@@ -172,11 +167,6 @@
 							else return a;
 							}
 							a = label.centroid(arc);
-							// var rot = function(){
-							// 	a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
-							// 	if(a>90) return a+180;
-							// 	else return a;
-							// }
 							d3.select('#text'+chosenSector)
 							.attr("transform", "translate(" + a + ")" +"rotate(" + rot() + ")")
 							break;
@@ -198,31 +188,53 @@
 		// then we pick each of them to draw on to the screen
 		for	(let i =0; i < chart.arcs.length; i++){
 			let arc = chart.arcs[i];
-			svg.append("path") 
-				.attr("id", arc.name)
-				.attr("class", "arc") // set style name as "arc"
-				.attr("d", arc.item)
-				.on('mousedown',function(){
-					chosenSector = arc.name
-				})
-				.attr("startAngle",arc.startAngle)
-				.attr("endAngle",arc.endAngle);
-			var label = d3.arc()
-					.outerRadius(arc.outerRadius)
-					.innerRadius(arc.innerRadius);
-			var rot = function(){
-				a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
-				if(a>90) return a+180;
-				else return a;
+			if(arc.name.slice(0,5)!="blank"){
+				svg.append("path") 
+					.attr("id", arc.name)
+					.attr("class", "arc") // set style name as "arc"
+					.attr("d", arc.item)
+					.on('mousedown',function(){
+						chosenSector = arc.name
+					})
+					.attr("startAngle",arc.startAngle)
+					.attr("endAngle",arc.endAngle)
+					.style("fill" , "#0f0")
+					.style("stroke" ,"#98FB98")
+					;
+				var label = d3.arc()
+						.outerRadius(arc.outerRadius)
+						.innerRadius(arc.innerRadius);
+				var rot = function(){
+					a = 180 / Math.PI * (arc.startAngle+arc.endAngle)/2 -90;
+					if(a>90) return a+180;
+					else return a;
+				}
+				a = label.centroid(arc)
+				svg.append("text")
+					.attr("id", "text"+arc.name)
+					.attr("class", "text")
+					.text(function() { return arc.name +": "+ arc.value})
+					.attr("text-anchor", "middle")
+					.attr("transform", "translate(" + a + ")" +"rotate(" + rot() + ")")
+					.style("font-size", "10px")
 			}
-			a = label.centroid(arc)
-			svg.append("text")
-				.attr("id", "text"+arc.name)
-				.attr("class", "text")
-				.text(function() { return arc.name +": "+ arc.value})
-				.attr("text-anchor", "middle")
-				.attr("transform", "translate(" + a + ")" +"rotate(" + rot() + ")")
-				.style("font-size", "10px")	
+
+		}
+		for	(let i =0; i < chart.arcs.length; i++){
+			let arc = chart.arcs[i];
+			if(arc.name.slice(0,5)=="blank"){
+			svg.append("path") 
+					.attr("id", arc.name)
+					.attr("class", "blank") // set style name as "arc"
+					.attr("d", arc.item)
+					.on('mousedown',function(){
+						chosenSector = arc.name
+					})
+					.attr("startAngle",arc.startAngle)
+					.attr("endAngle",arc.endAngle)
+					.style("fill","#98FB98")
+					// .style("stroke","#000")
+				}
 		}
 		
 				
@@ -248,12 +260,12 @@
 				
 			}
 		}
-        let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
-		// apply the style onto each element
-        for	(var i = 0; i < ps.length; i++){
-			ps[i].style.fill = "#0f0";
-			ps[i].style.stroke ="#000";
-		} 
+        // let ps = document.querySelectorAll(".arc"); // get all elements that have style name as 'arc'
+		// // apply the style onto each element
+        // for	(var i = 0; i < ps.length; i++){
+		// 	ps[i].style.fill = "#0f0";
+		// 	ps[i].style.stroke ="#98FB98";
+		// }
 		
     </script>  
 </body>  
