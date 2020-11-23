@@ -39,7 +39,7 @@ var SBChart = function(cx, cy, lvlRadius){
 					.outerRadius(r + this.lvlRadius - r0) 
 					.innerRadius(r + r0) 
 					.startAngle(endAngle) 
-					.endAngle(endAngle+0.1)
+					.endAngle(endAngle+0.05)
 					// Use of cornerRadius Function
 					// .padAngle(0.05) 
 					.cornerRadius(0);
@@ -51,11 +51,12 @@ var SBChart = function(cx, cy, lvlRadius){
 								"level": Math.floor((r+ this.lvlRadius)/(this.lvlRadius))-1,
 								"innerRadius": r + r0,
 								"outerRadius":r + this.lvlRadius - r0,
-								"value": children[i].value
+								"value": children[i].value,
+								"children": children[i].children
 							});
 				this.arcs.push({
 								"parent":parentName, 
-								"name":"blank"+parentName+i, 
+								"name":"blank"+children[i].name, 
 								"item":gap,
 								"startAngle":endAngle,
 								"endAngle":endAngle+0.05,
@@ -70,3 +71,54 @@ var SBChart = function(cx, cy, lvlRadius){
 		}
 	}
 }
+let model = {
+	"children" : [
+		{
+			"name" : "food",
+			"value" : "300",
+			"children" : 
+			[
+				{
+					"name" : "Seafood",
+					"value" : "1300"
+				},
+				{
+					"name" : "Meat",
+					"value" : "2700"
+				}
+			]
+		},
+		{
+			"name" : "drink",
+			"value" : "800",
+			"children" : [
+				{
+					"name" : "COCACOLA",
+					"value" : "700"
+				},
+				{
+					"name" : "PEPSI",
+					"value" : "850"
+				},
+				{
+					"name" : "BEERS",
+					"value" : "5700",
+					"children" : [
+						{
+							"name" : "HENEIKEN",
+							"value" : "5700"
+						},
+						{
+							"name" : "TIGER",
+							"value" : "5700"
+						},
+						{
+							"name" : "BUDWWEISER",
+							"value" : "25700"
+						}
+					]
+				}
+			]
+		}
+	]
+};	
