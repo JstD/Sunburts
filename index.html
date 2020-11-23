@@ -91,7 +91,7 @@
 					x0= mouse[0];
 					y0= mouse[1]
 				}
-				if (chosenSector != ''){
+				if (chosenSector != '' && chosenSector.slice(0,5)!="blank"){
 					let p = d3.select('#'+chosenSector);
 					let tx = mouse[0] - x0;
 					let ty = mouse[1] - y0;
@@ -114,7 +114,7 @@
 			.on("mousemove", function(){
 				if (isDown){
 					let mouse = d3.mouse(this);
-					if (chosenSector != ''){
+					if (chosenSector != ''&& chosenSector.slice(0,5)!="blank"){
 						let p = d3.select('#'+chosenSector);
 						let tx = mouse[0] - x0;
 						let ty = mouse[1] - y0;
